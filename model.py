@@ -2,7 +2,22 @@ from lasagne.easy import SimpleNeuralNet
 import pandas as pd
 import numpy as np
 from sklearn.preprocessing import StandardScaler
+from sklearn.ensemble import RandomForestClassifier
 from sklearn.pipeline import Pipeline
+
+class EnsembleEstimators(object):
+
+    def __init__(self, model):
+        self.model = model
+
+    def fit(self, X, y):
+        print "fitting"
+        self.model.fit(X, y)
+        return self
+
+    def transform(self, X):
+        X = np.concatenate([e.predict(X)[:, np.newaxis] for e in self.model.estimators_], axis=1)
+        return X.astype(np.float32)
 
 def model(X_train, y_train, X_test):
     # replace Nans with -1
@@ -12,7 +27,7 @@ def model(X_train, y_train, X_test):
     X_test = X_test.astype(np.float32)
     y_train = y_train.astype(np.int32)
 
-    model = Pipeline( [('standardize', StandardScaler()),
+    model = Pipeline( [('rf', EnsembleEstimators(RandomForestClassifier(n_estimators=200, max_depth=3, n_jobs=-1))),
                        ('neuralnet', SimpleNeuralNet(nb_hidden_list=[100], max_nb_epochs=20, batch_size=100, learning_rate=1.))
     ])
     # Fit and predict
