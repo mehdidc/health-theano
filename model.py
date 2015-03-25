@@ -34,7 +34,7 @@ class Classifier(BaseEstimator):
 
     def predict_proba(self, X):
         X = X.astype(theano.config.floatX)
-        return self.clf.decision_function(X)
+        return self.clf.predict_proba(X)
 
 
 class EnsembleEstimatorTransformer(object):
